@@ -1,3 +1,7 @@
+Doors Redo (Edited by TenPlus1)
+
+Based on
+
 Minetest Game mod: doors
 ========================
 version: 2.0

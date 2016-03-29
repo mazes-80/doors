@@ -12,56 +12,83 @@ doors = {}
 
 -- private data
 local _doors = {}
+
 _doors.registered_doors = {}
 _doors.registered_trapdoors = {}
 
 -- returns an object to a door object or nil
 function doors.get(pos)
+
 	if _doors.registered_doors[minetest.get_node(pos).name] then
+
 		-- A normal upright door
 		return {
 			pos = pos,
+
 			open = function(self, player)
+
 				if self:state() then
 					return false
 				end
+
 				return _doors.door_toggle(self.pos, player)
 			end,
+
 			close = function(self, player)
+
 				if not self:state() then
 					return false
 				end
+
 				return _doors.door_toggle(self.pos, player)
 			end,
+
 			toggle = function(self, player)
+
 				return _doors.door_toggle(self.pos, player)
 			end,
+
 			state = function(self)
+
 				local state = minetest.get_meta(self.pos):get_int("state")
+
 				return state %2 == 1
 			end
 		}
 	elseif _doors.registered_trapdoors[minetest.get_node(pos).name] then
+
 		-- A trapdoor
 		return {
+
 			pos = pos,
+
 			open = function(self, player)
+
 				if self:state() then
 					return false
 				end
+
 				return _doors.trapdoor_toggle(self.pos, player)
 			end,
+
 			close = function(self, player)
+
 				if not self:state() then
 					return false
 				end
+
 				return _doors.trapdoor_toggle(self.pos, player)
 			end,
+
 			toggle = function(self, player)
+
 				return _doors.trapdoor_toggle(self.pos, player)
 			end,
+
 			state = function(self)
+
 				local name = minetest.get_node(pos).name
+
 				return name:sub(-5) == "_open"
 			end
 		}
@@ -88,7 +115,6 @@ minetest.register_node("doors:hidden", {
 	floodable = false,
 	drop = "",
 	groups = {not_in_creative_inventory = 1},
-	on_blast = function() end,
 	tiles = {"doors_blank.png"},
 	-- 1px transparent block inside door hinge near node top.
 	nodebox = {
@@ -100,6 +126,7 @@ minetest.register_node("doors:hidden", {
 		type = "fixed",
 		fixed = {-15/32, 13/32, -15/32, -13/32, 1/2, -13/32},
 	},
+	on_blast = function() end,
 })
 
 -- table used to aid door opening/closing
@@ -131,12 +158,14 @@ local transform = {
 }
 
 function _doors.door_toggle(pos, clicker)
+
 	local meta = minetest.get_meta(pos)
 	local def = minetest.registered_nodes[minetest.get_node(pos).name]
 	local name = def.door.name
-
 	local state = meta:get_string("state")
+
 	if state == "" then
+
 		-- fix up lvm-placed right-hinged doors, default closed
 		if minetest.get_node(pos).name:sub(-2) == "_b" then
 			state = 2
@@ -146,13 +175,18 @@ function _doors.door_toggle(pos, clicker)
 	end
 
 	if clicker and not minetest.check_player_privs(clicker, "protection_bypass") then
+
 		local owner = meta:get_string("doors_owner")
 		local prot = meta:get_string("doors_protected")
+
 		if prot ~= "" then
+
 			if minetest.is_protected(pos, clicker:get_player_name()) then
 				return false
 			end
+
 		elseif owner ~= "" then
+
 			if clicker:get_player_name() ~= owner then
 				return false
 			end
@@ -160,6 +194,7 @@ function _doors.door_toggle(pos, clicker)
 	end
 
 	local old = state
+
 	-- until Lua-5.2 we have no bitwise operators :(
 	if state % 2 == 1 then
 		state = state - 1
@@ -168,15 +203,18 @@ function _doors.door_toggle(pos, clicker)
 	end
 
 	local dir = minetest.get_node(pos).param2
+
 	if state % 2 == 0 then
-		minetest.sound_play(def.door.sounds[1], {pos = pos, gain = 0.3, max_hear_distance = 10})
+		minetest.sound_play(def.door.sounds[1],
+			{pos = pos, gain = 0.3, max_hear_distance = 10})
 	else
-		minetest.sound_play(def.door.sounds[2], {pos = pos, gain = 0.3, max_hear_distance = 10})
+		minetest.sound_play(def.door.sounds[2],
+			{pos = pos, gain = 0.3, max_hear_distance = 10})
 	end
 
 	minetest.swap_node(pos, {
-		name = name .. transform[state + 1][dir+1].v,
-		param2 = transform[state + 1][dir+1].param2
+		name = name .. transform[state + 1][dir + 1].v,
+		param2 = transform[state + 1][dir + 1].param2
 	})
 	meta:set_int("state", state)
 
@@ -185,9 +223,12 @@ end
 
 
 local function on_place_node(place_to, newnode, placer, oldnode, itemstack, pointed_thing)
+
 	-- Run script hook
 	local _, callback
+
 	for _, callback in ipairs(core.registered_on_placenodes) do
+
 		-- Deepcopy pos, node and pointed_thing because callback can modify them
 		local place_to_copy = {x = place_to.x, y = place_to.y, z = place_to.z}
 		local newnode_copy = {name = newnode.name, param1 = newnode.param1, param2 = newnode.param2}
@@ -198,21 +239,26 @@ local function on_place_node(place_to, newnode, placer, oldnode, itemstack, poin
 			under = vector.new(pointed_thing.under),
 			ref   = pointed_thing.ref,
 		}
+
 		callback(place_to_copy, newnode_copy, placer, oldnode_copy, itemstack, pointed_thing_copy)
 	end
 end
 
 function doors.register(name, def)
+
 	if not name:find(":") then
 		name = "doors:" .. name
 	end
 
 	-- replace old doors of this type automatically
 	minetest.register_abm({
+
 		nodenames = {name.."_b_1", name.."_b_2"},
 		interval = 7.0,
 		chance = 1,
+
 		action = function(pos, node, active_object_count, active_object_count_wider)
+
 			local l = tonumber(node.name:sub(-1))
 			local meta = minetest.get_meta(pos)
 			local h = meta:get_int("right") + 1
@@ -222,21 +268,27 @@ function doors.register(name, def)
 				{ { type = "b", state = 1 }, { type = "b", state = 2 } }
 			}
 			local new = replace[l][h]
+
 			-- retain infotext and doors_owner fields
 			minetest.swap_node(pos, {name = name .. "_" .. new.type, param2 = p2})
 			meta:set_int("state", new.state)
+
 			-- properly place doors:hidden at the right spot
 			local p3 = p2
+
 			if new.state >= 2 then
 				p3 = (p3 + 3) % 4
 			end
+
 			if new.state % 2 == 1 then
+
 				if new.state >= 2 then
 					p3 = (p3 + 1) % 4
 				else
 					p3 = (p3 + 3) % 4
 				end
 			end
+
 			-- wipe meta on top node as it's unused
 			minetest.set_node({x = pos.x, y = pos.y + 1, z = pos.z},
 				{name = "doors:hidden", param2 = p3})
@@ -248,6 +300,7 @@ function doors.register(name, def)
 		inventory_image = def.inventory_image,
 
 		on_place = function(itemstack, placer, pointed_thing)
+
 			local pos = nil
 
 			if not pointed_thing.type == "node" then
@@ -256,29 +309,37 @@ function doors.register(name, def)
 
 			local node = minetest.get_node(pointed_thing.under)
 			local pdef = minetest.registered_nodes[node.name]
-			if pdef and pdef.on_rightclick then
+
+			if pdef
+			and pdef.on_rightclick then
 				return pdef.on_rightclick(pointed_thing.under,
 						node, placer, itemstack)
 			end
 
-			if pdef and pdef.buildable_to then
+			if pdef
+			and pdef.buildable_to then
 				pos = pointed_thing.under
 			else
 				pos = pointed_thing.above
 				node = minetest.get_node(pos)
 				pdef = minetest.registered_nodes[node.name]
-				if not pdef or not pdef.buildable_to then
+
+				if not pdef
+				or not pdef.buildable_to then
 					return itemstack
 				end
 			end
 
 			local above = { x = pos.x, y = pos.y + 1, z = pos.z }
+
 			if not minetest.registered_nodes[minetest.get_node(above).name].buildable_to then
 				return itemstack
 			end
 
 			local pn = placer:get_player_name()
-			if minetest.is_protected(pos, pn) or minetest.is_protected(above, pn) then
+
+			if minetest.is_protected(pos, pn)
+			or minetest.is_protected(above, pn) then
 				return itemstack
 			end
 
@@ -298,8 +359,11 @@ function doors.register(name, def)
 			}
 
 			local state = 0
+
 			if minetest.get_item_group(minetest.get_node(aside).name, "door") == 1 then
+
 				state = state + 2
+
 				minetest.set_node(pos, {name = name .. "_b", param2 = dir})
 				minetest.set_node(above, {name = "doors:hidden", param2 = (dir + 3) % 4})
 			else
@@ -308,10 +372,13 @@ function doors.register(name, def)
 			end
 
 			local meta = minetest.get_meta(pos)
+
 			meta:set_int("state", state)
 
 			if def.protected then
+
 				local pn = placer:get_player_name()
+
 				meta:set_string("doors_owner", pn)
 				meta:set_string("infotext", "Owned by " .. pn)
 			end
@@ -327,17 +394,22 @@ function doors.register(name, def)
 	})
 
 	local can_dig = function(pos, digger)
+
 		if not def.protected then
 			return true
 		end
+
 		if minetest.check_player_privs(digger, "protection_bypass") then
 			return true
 		end
+
 		local meta = minetest.get_meta(pos)
 		local name = ""
+
 		if digger then
 			name = digger:get_player_name()
 		end
+
 		return meta:get_string("doors_owner") == name
 	end
 
@@ -364,13 +436,16 @@ function doors.register(name, def)
 	def.on_rightclick = function(pos, node, clicker)
 		_doors.door_toggle(pos, clicker)
 	end
+
 	def.after_dig_node = function(pos, node, meta, digger)
 		minetest.remove_node({x = pos.x, y = pos.y + 1, z = pos.z})
 		nodeupdate({x = pos.x, y = pos.y + 1, z = pos.z})
 	end
+
 	def.can_dig = function(pos, player)
 		return can_dig(pos, player)
 	end
+
 	def.on_rotate = function(pos, node, user, mode, new_param2)
 		return false
 	end
@@ -379,9 +454,12 @@ function doors.register(name, def)
 		def.on_blast = function() end
 	else
 		def.on_blast = function(pos, intensity)
+
 			minetest.remove_node(pos)
+
 			-- hidden node doesn't get blasted away.
 			minetest.remove_node({x = pos.x, y = pos.y + 1, z = pos.z})
+
 			return {name}
 		end
 	end
@@ -466,73 +544,78 @@ function doors.register(name, def)
 end
 
 doors.register("door_wood", {
-		tiles = {{ name = "doors_door_wood.png", backface_culling = true }},
-		description = "Wooden Door",
-		inventory_image = "doors_item_wood.png",
-		groups = { snappy = 1, choppy = 2, oddly_breakable_by_hand = 2, flammable = 2 },
-		recipe = {
-			{"group:wood", "group:wood"},
-			{"group:wood", "group:wood"},
-			{"group:wood", "group:wood"},
-		}
+	tiles = {{ name = "doors_door_wood.png", backface_culling = true }},
+	description = "Wooden Door",
+	inventory_image = "doors_item_wood.png",
+	groups = { snappy = 1, choppy = 2, oddly_breakable_by_hand = 2, flammable = 2 },
+	recipe = {
+		{"group:wood", "group:wood"},
+		{"group:wood", "group:wood"},
+		{"group:wood", "group:wood"},
+	}
 })
 
 doors.register("door_steel", {
-		tiles = {{ name = "doors_door_steel.png", backface_culling = true }},
-		description = "Steel Door",
-		inventory_image = "doors_item_steel.png",
-		protected = true,
-		groups = { snappy = 1, bendy = 2, cracky = 1, melty = 2, level = 2 },
-		sound_open = "doors_steel_door_open",
-		sound_close = "doors_steel_door_close",
-		recipe = {
-			{"default:steel_ingot", "default:steel_ingot"},
-			{"default:steel_ingot", "default:steel_ingot"},
-			{"default:steel_ingot", "default:steel_ingot"},
-		}
+	tiles = {{ name = "doors_door_steel.png", backface_culling = true }},
+	description = "Steel Door",
+	inventory_image = "doors_item_steel.png",
+	protected = true,
+	groups = { snappy = 1, bendy = 2, cracky = 1, melty = 2, level = 2 },
+	sound_open = "doors_steel_door_open",
+	sound_close = "doors_steel_door_close",
+	recipe = {
+		{"default:steel_ingot", "default:steel_ingot"},
+		{"default:steel_ingot", "default:steel_ingot"},
+		{"default:steel_ingot", "default:steel_ingot"},
+	}
 })
 
 doors.register("door_glass", {
-		tiles = { "doors_door_glass.png"},
-		description = "Glass Door",
-		inventory_image = "doors_item_glass.png",
-		groups = { snappy=1, cracky=1, oddly_breakable_by_hand=3 },
-		sounds = default.node_sound_glass_defaults(),
-		recipe = {
-			{"default:glass", "default:glass"},
-			{"default:glass", "default:glass"},
-			{"default:glass", "default:glass"},
-		}
+	tiles = { "doors_door_glass.png"},
+	description = "Glass Door",
+	inventory_image = "doors_item_glass.png",
+	groups = { snappy = 1, cracky = 1, oddly_breakable_by_hand = 3 },
+	sounds = default.node_sound_glass_defaults(),
+	recipe = {
+		{"default:glass", "default:glass"},
+		{"default:glass", "default:glass"},
+		{"default:glass", "default:glass"},
+	}
 })
 
 doors.register("door_obsidian_glass", {
-		tiles = { "doors_door_obsidian_glass.png" },
-		description = "Obsidian Glass Door",
-		inventory_image = "doors_item_obsidian_glass.png",
-		groups = { snappy=1, cracky=1, oddly_breakable_by_hand=3 },
-		sounds = default.node_sound_glass_defaults(),
-		recipe = {
-			{"default:obsidian_glass", "default:obsidian_glass"},
-			{"default:obsidian_glass", "default:obsidian_glass"},
-			{"default:obsidian_glass", "default:obsidian_glass"},
-		},
+	tiles = { "doors_door_obsidian_glass.png" },
+	description = "Obsidian Glass Door",
+	inventory_image = "doors_item_obsidian_glass.png",
+	groups = { snappy = 1, cracky = 1 },
+	sounds = default.node_sound_glass_defaults(),
+	recipe = {
+		{"default:obsidian_glass", "default:obsidian_glass"},
+		{"default:obsidian_glass", "default:obsidian_glass"},
+		{"default:obsidian_glass", "default:obsidian_glass"},
+	},
 })
 
 -- Capture mods using the old API as best as possible.
 function doors.register_door(name, def)
+
 	if def.only_placer_can_open then
 		def.protected = true
 	end
+
 	def.only_placer_can_open = nil
 
 	local i = name:find(":")
 	local modname = name:sub(1, i - 1)
+
 	if not def.tiles then
+
 		if def.protected then
 			def.tiles = {{name = "doors_door_steel.png", backface_culling = true}}
 		else
 			def.tiles = {{name = "doors_door_wood.png", backface_culling = true}}
 		end
+
 		minetest.log("warning", modname .. " registered door \"" .. name .. "\" " ..
 				"using deprecated API method \"doors.register_door()\" but " ..
 				"did not provide the \"tiles\" parameter. A fallback tiledef " ..
@@ -545,10 +628,15 @@ end
 ----trapdoor----
 
 function _doors.trapdoor_toggle(pos, clicker)
-	if clicker and not minetest.check_player_privs(clicker, "protection_bypass") then
+
+	if clicker
+	and not minetest.check_player_privs(clicker, "protection_bypass") then
+
 		local meta = minetest.get_meta(pos)
 		local owner = meta:get_string("doors_owner")
+
 		if owner ~= "" then
+
 			if clicker:get_player_name() ~= owner then
 				return false
 			end
@@ -559,24 +647,38 @@ function _doors.trapdoor_toggle(pos, clicker)
 	local def = minetest.registered_nodes[node.name]
 
 	if string.sub(node.name, -5) == "_open" then
-		minetest.sound_play(def.sound_close, {pos = pos, gain = 0.3, max_hear_distance = 10})
-		minetest.swap_node(pos, {name = string.sub(node.name, 1, string.len(node.name) - 5), param1 = node.param1, param2 = node.param2})
+
+		minetest.sound_play(def.sound_close,
+			{pos = pos, gain = 0.3, max_hear_distance = 10})
+
+		minetest.swap_node(pos, {
+			name = string.sub(node.name, 1, string.len(node.name) - 5),
+			param1 = node.param1, param2 = node.param2})
 	else
-		minetest.sound_play(def.sound_open, {pos = pos, gain = 0.3, max_hear_distance = 10})
-		minetest.swap_node(pos, {name = node.name .. "_open", param1 = node.param1, param2 = node.param2})
+		minetest.sound_play(def.sound_open,
+			{pos = pos, gain = 0.3, max_hear_distance = 10})
+
+		minetest.swap_node(pos, {
+			name = node.name .. "_open",
+			param1 = node.param1, param2 = node.param2})
 	end
 end
 
 function doors.register_trapdoor(name, def)
+
 	local name_closed = name
 	local name_opened = name.."_open"
 
 	local function check_player_priv(pos, player)
-		if not def.protected or minetest.check_player_privs(player, "protection_bypass") then
+
+		if not def.protected
+		or minetest.check_player_privs(player, "protection_bypass") then
 			return true
 		end
+
 		local meta = minetest.get_meta(pos)
 		local pn = player:get_player_name()
+
 		return meta:get_string("doors_owner") == pn
 	end
 
@@ -592,9 +694,12 @@ function doors.register_trapdoor(name, def)
 	def.can_dig = check_player_priv
 
 	if def.protected then
+
 		def.after_place_node = function(pos, placer, itemstack, pointed_thing)
+
 			local pn = placer:get_player_name()
 			local meta = minetest.get_meta(pos)
+
 			meta:set_string("doors_owner", pn)
 			meta:set_string("infotext", "Owned by "..pn)
 
@@ -604,8 +709,10 @@ function doors.register_trapdoor(name, def)
 		def.on_blast = function() end
 	else
 		def.on_blast = function(pos, intensity)
+
 			minetest.remove_node(pos)
 			minetest.remove_node({ x = pos.x, y = pos.y + 1, z = pos.z})
+
 			return { name }
 		end
 	end
@@ -665,7 +772,10 @@ doors.register_trapdoor("doors:trapdoor", {
 	wield_image = "doors_trapdoor.png",
 	tile_front = "doors_trapdoor.png",
 	tile_side = "doors_trapdoor_side.png",
-	groups = {snappy=1, choppy=2, oddly_breakable_by_hand=2, flammable=2, door=1},
+	groups = {
+		snappy = 1, choppy = 2, oddly_breakable_by_hand = 2,
+		flammable = 2, door = 1
+	},
 })
 
 doors.register_trapdoor("doors:trapdoor_steel", {
@@ -677,7 +787,9 @@ doors.register_trapdoor("doors:trapdoor_steel", {
 	protected = true,
 	sound_open = "doors_steel_door_open",
 	sound_close = "doors_steel_door_close",
-	groups = {snappy=1, bendy=2, cracky=1, melty=2, level=2, door=1},
+	groups = {
+		snappy = 1, bendy = 2, cracky = 1, melty = 2, level = 2, door = 1
+	},
 })
 
 minetest.register_craft({
@@ -719,7 +831,9 @@ minetest.register_tool("doors:key", {
 		local ok = 0
 		local infotext = ""
 
-		if prot == "" and owner == "" then
+		if prot == ""
+		and owner == "" then
+
 			-- flip normal to owned
 			if minetest.is_protected(pos, player_name) then
 				minetest.record_protection_violation(pos, player_name)
@@ -730,7 +844,9 @@ minetest.register_tool("doors:key", {
 				ok = 1
 			end
 
-		elseif prot == "" and owner ~= "" then
+		elseif prot == ""
+		and owner ~= "" then
+
 			-- flip owned to protected
 			if player_name == owner then
 				infotext = "Protected by " .. player_name
@@ -739,7 +855,9 @@ minetest.register_tool("doors:key", {
 				ok = 1
 			end
 
-		elseif prot ~= "" and owner == "" then
+		elseif prot ~= ""
+		and owner == "" then
+
 			-- flip protected to normal
 			if player_name == prot then
 				owner = ""
@@ -749,9 +867,11 @@ minetest.register_tool("doors:key", {
 		end
 
 		if ok == 1 then
+
 			meta:set_string("infotext", infotext)
 			meta:set_string("doors_owner", owner)
 			meta:set_string("doors_protected", prot)
+
 			if not minetest.setting_getbool("creative_mode") then
 				itemstack:add_wear(65535 / 50)
 			end
@@ -774,6 +894,7 @@ minetest.register_craft({
 ----fence gate----
 
 function doors.register_fencegate(name, def)
+
 	local fence = {
 		description = def.description,
 		drawtype = "mesh",
@@ -786,17 +907,25 @@ function doors.register_fencegate(name, def)
 		connect_sides = { "left", "right" },
 		groups = def.groups,
 		sounds = def.sounds,
-		on_rightclick = function(pos, clicker)
-			local node = minetest.get_node(pos)
-			local node_def = minetest.registered_nodes[node.name]
-			minetest.swap_node(pos, {name = node_def.gate, param2 = node.param2})
-			minetest.sound_play(node_def.sound, {pos = pos, gain = 0.3,
-				max_hear_distance = 8})
-		end,
 		selection_box = {
 			type = "fixed",
 			fixed = {-1/2, -1/2, -1/4, 1/2, 1/2, 1/4},
 		},
+
+		on_rightclick = function(pos, clicker)
+
+			local node = minetest.get_node(pos)
+			local node_def = minetest.registered_nodes[node.name]
+
+			minetest.swap_node(pos, {
+				name = node_def.gate,
+				param2 = node.param2
+			})
+
+			minetest.sound_play(node_def.sound, {
+				pos = pos, gain = 0.3, max_hear_distance = 8
+			})
+		end,
 	}
 
 	if not fence.sounds then
