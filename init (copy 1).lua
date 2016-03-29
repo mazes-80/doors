@@ -399,6 +399,7 @@ function doors.register(name, def)
 		paramtype = "light",
 		paramtype2 = "facedir",
 		sunlight_propagates = true,
+		--use_texture_alpha = true, -- CHANGED!
 		walkable = true,
 		is_ground_content = false,
 		buildable_to = false,
@@ -431,6 +432,7 @@ function doors.register(name, def)
 		paramtype = "light",
 		paramtype2 = "facedir",
 		sunlight_propagates = true,
+		--use_texture_alpha = true, -- CHANGED!
 		walkable = true,
 		is_ground_content = false,
 		buildable_to = false,
@@ -717,44 +719,39 @@ minetest.register_tool("doors:key", {
 		local owner = meta:get_string("doors_owner")
 		local prot = meta:get_string("doors_protected")
 		local ok = 0
-		local infotext = ""
 
 		if prot == "" and owner == "" then
 			-- flip normal to owned
 			if minetest.is_protected(pos, player_name) then
 				minetest.record_protection_violation(pos, player_name)
 			else
-				infotext = "Owned by" .. player_name
-				owner = player_name
-				prot = ""
+				meta:set_string("infotext", "Owned by " .. player_name)
+				meta:set_string("doors_owner", player_name)
+				meta:set_string("doors_protected", "")
 				ok = 1
 			end
 
 		elseif prot == "" and owner ~= "" then
 			-- flip owned to protected
 			if player_name == owner then
-				infotext = "Protected by " .. player_name
-				owner = ""
-				prot = player_name
+				meta:set_string("infotext", "Protected by " .. player_name)
+				meta:set_string("doors_owner", "")
+				meta:set_string("doors_protected", player_name)
 				ok = 1
 			end
 
 		elseif prot ~= "" and owner == "" then
 			-- flip protected to normal
 			if player_name == prot then
-				owner = ""
-				prot = ""
+				meta:set_string("infotext", "")
+				meta:set_string("doors_owner", "")
+				meta:set_string("doors_protected", "")
 				ok = 1
 			end
 		end
 
-		if ok == 1 then
-			meta:set_string("infotext", infotext)
-			meta:set_string("doors_owner", owner)
-			meta:set_string("doors_protected", prot)
-			if not minetest.setting_getbool("creative_mode") then
-				itemstack:add_wear(65535 / 50)
-			end
+		if not minetest.setting_getbool("creative_mode") and ok == 1 then
+			itemstack:add_wear(65535 / 50)
 		end
 
 		return itemstack
