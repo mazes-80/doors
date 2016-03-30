@@ -839,7 +839,7 @@ minetest.register_tool("doors:key", {
 			if minetest.is_protected(pos, player_name) then
 				minetest.record_protection_violation(pos, player_name)
 			else
-				infotext = "Owned by" .. player_name
+				infotext = "Owned by " .. player_name
 				owner = player_name
 				prot = ""
 				ok = 1
