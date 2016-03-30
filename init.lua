@@ -9,6 +9,7 @@ Copyright (C) 2015 - Auke Kok <sofar@foo-projects.org>
 
 -- our API object
 doors = {}
+doors.mod = "redo"
 
 -- private data
 local _doors = {}
