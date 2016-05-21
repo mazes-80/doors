@@ -168,9 +168,11 @@ function _doors.door_toggle(pos, clicker)
 	if state == "" then
 
 		-- fix up lvm-placed right-hinged doors, default closed
-		--if minetest.get_node(pos).name:sub(-2) == "_b" then
+		if minetest.get_node(pos).name:sub(-2) == "_b" then
 			state = 2
-		--end
+		else
+			state = 0
+		end
 	else
 		state = tonumber(state)
 	end
