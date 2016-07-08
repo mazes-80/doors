@@ -539,9 +539,9 @@ function doors.register_trapdoor(name, def)
 		if not def.protected or minetest.check_player_privs(player, "protection_bypass") then
 			return true
 		end
-		local meta = minetest.get_meta(pos)
-		local pn = player:get_player_name()
-		return meta:get_string("doors_owner") == pn
+		local meta = minetest.get_meta(pos) ; player = nil
+		local player_name = player and player:get_player_name()
+		return meta:get_string("doors_owner") == player_name
 	end
 
 	def.on_rightclick = function(pos, node, clicker)
