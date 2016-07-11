@@ -18,7 +18,8 @@ _doors.registered_trapdoors = {}
 
 -- returns an object to a door object or nil
 function doors.get(pos)
-	if _doors.registered_doors[minetest.get_node(pos).name] then
+	local node_name = minetest.get_node(pos).name
+	if _doors.registered_doors[node_name] then
 		-- A normal upright door
 		return {
 			pos = pos,
@@ -26,23 +27,23 @@ function doors.get(pos)
 				if self:state() then
 					return false
 				end
-				return _doors.door_toggle(self.pos, player)
+				return _doors.door_toggle(self.pos, nil, player)
 			end,
 			close = function(self, player)
 				if not self:state() then
 					return false
 				end
-				return _doors.door_toggle(self.pos, player)
+				return _doors.door_toggle(self.pos, nil, player)
 			end,
 			toggle = function(self, player)
-				return _doors.door_toggle(self.pos, player)
+				return _doors.door_toggle(self.pos, nil, player)
 			end,
 			state = function(self)
 				local state = minetest.get_meta(self.pos):get_int("state")
 				return state %2 == 1
 			end
 		}
-	elseif _doors.registered_trapdoors[minetest.get_node(pos).name] then
+	elseif _doors.registered_trapdoors[node_name] then
 		-- A trapdoor
 		return {
 			pos = pos,
@@ -50,20 +51,19 @@ function doors.get(pos)
 				if self:state() then
 					return false
 				end
-				return _doors.trapdoor_toggle(self.pos, player)
+				return _doors.trapdoor_toggle(self.pos, nil, player)
 			end,
 			close = function(self, player)
 				if not self:state() then
 					return false
 				end
-				return _doors.trapdoor_toggle(self.pos, player)
+				return _doors.trapdoor_toggle(self.pos, nil, player)
 			end,
 			toggle = function(self, player)
-				return _doors.trapdoor_toggle(self.pos, player)
+				return _doors.trapdoor_toggle(self.pos, nil, player)
 			end,
 			state = function(self)
-				local name = minetest.get_node(pos).name
-				return name:sub(-5) == "_open"
+				return minetest.get_node(self.pos).name:sub(-5) == "_open"
 			end
 		}
 	else
@@ -131,15 +131,16 @@ local transform = {
 	},
 }
 
-function _doors.door_toggle(pos, clicker)
+function _doors.door_toggle(pos, node, clicker)
 	local meta = minetest.get_meta(pos) ; if not meta then return false end
-	local def = minetest.registered_nodes[minetest.get_node(pos).name]
+	node = node or minetest.get_node(pos)
+	local def = minetest.registered_nodes[node.name]
 	local name = def.door.name
 
 	local state = meta:get_string("state")
 	if state == "" then
 		-- fix up lvm-placed right-hinged doors, default closed
-		if minetest.get_node(pos).name:sub(-2) == "_b" then
+		if node.name:sub(-2) == "_b" then
 			state = 2
 		else
 			state = 0
@@ -173,7 +174,7 @@ function _doors.door_toggle(pos, clicker)
 		state = state + 1
 	end
 
-	local dir = minetest.get_node(pos).param2
+	local dir = node.param2
 	if state % 2 == 0 then
 		minetest.sound_play(def.door.sounds[1], {pos = pos, gain = 0.3, max_hear_distance = 10})
 	else
@@ -375,8 +376,9 @@ function doors.register(name, def)
 		sounds = { def.sound_close, def.sound_open },
 	}
 
-	def.on_rightclick = function(pos, node, clicker)
-		_doors.door_toggle(pos, clicker)
+	def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+		_doors.door_toggle(pos, node, clicker)
+		return itemstack
 	end
 	def.after_dig_node = function(pos, node, meta, digger)
 		minetest.remove_node({x = pos.x, y = pos.y + 1, z = pos.z})
@@ -508,7 +510,8 @@ end
 
 ----trapdoor----
 
-function _doors.trapdoor_toggle(pos, clicker)
+function _doors.trapdoor_toggle(pos, node, clicker)
+	node = node or minetest.get_node(pos)
 	if clicker and not minetest.check_player_privs(clicker, "protection_bypass") then
 		local meta = minetest.get_meta(pos)
 		local owner = meta:get_string("doors_owner")
@@ -519,7 +522,6 @@ function _doors.trapdoor_toggle(pos, clicker)
 		end
 	end
 
-	local node = minetest.get_node(pos)
 	local def = minetest.registered_nodes[node.name]
 
 	if string.sub(node.name, -5) == "_open" then
@@ -544,8 +546,9 @@ function doors.register_trapdoor(name, def)
 		return meta:get_string("doors_owner") == player_name
 	end
 
-	def.on_rightclick = function(pos, node, clicker)
-		_doors.trapdoor_toggle(pos, clicker)
+	def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+		_doors.trapdoor_toggle(pos, node, clicker)
+		return itemstack
 	end
 
 	-- Common trapdoor configuration
@@ -759,12 +762,12 @@ function doors.register_fencegate(name, def)
 		connect_sides = { "left", "right" },
 		groups = def.groups,
 		sounds = def.sounds,
-		on_rightclick = function(pos, clicker)
-			local node = minetest.get_node(pos)
+		on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 			local node_def = minetest.registered_nodes[node.name]
 			minetest.swap_node(pos, {name = node_def.gate, param2 = node.param2})
 			minetest.sound_play(node_def.sound, {pos = pos, gain = 0.3,
 				max_hear_distance = 8})
+			return itemstack
 		end,
 		selection_box = {
 			type = "fixed",
