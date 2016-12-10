@@ -505,9 +505,17 @@ end
 function _doors.trapdoor_toggle(pos, node, clicker)
 	node = node or minetest.get_node(pos)
 	if clicker and not minetest.check_player_privs(clicker, "protection_bypass") then
-		local meta = minetest.get_meta(pos)
+		local meta = minetest.get_meta(pos) ; if not meta then return false end
 		local owner = meta:get_string("doors_owner")
-		if owner ~= "" then
+		local prot = meta:get_string("doors_protected")
+		if prot ~= "" then
+
+			if minetest.is_protected(pos, clicker:get_player_name()) then
+				return false
+			end
+
+		elseif owner ~= "" then
+
 			if clicker:get_player_name() ~= owner then
 				return false
 			end
