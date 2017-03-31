@@ -260,7 +260,6 @@ function doors.register(name, def)
 	minetest.register_craftitem(":" .. name, {
 		description = def.description,
 		inventory_image = def.inventory_image,
-		groups = def.groups,
 
 		on_place = function(itemstack, placer, pointed_thing)
 			local pos = nil
