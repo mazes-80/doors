@@ -746,6 +746,10 @@ minetest.register_craft({
 	}
 })
 
+-- remove default key
+if minetest.registered_craftitems["default:skeleton_key"] then
+	minetest.clear_craft({output = "default:skeleton_key"})
+end
 
 ----fence gate----
 
