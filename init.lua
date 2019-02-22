@@ -8,18 +8,16 @@ Copyright (C) 2015 - Auke Kok <sofar@foo-projects.org>
 --]]
 
 -- our API object
-doors = {}
-doors.mod = "redo"
-
--- private data
-local _doors = {}
-_doors.registered_doors = {}
-_doors.registered_trapdoors = {}
+doors = {
+	mod = "redo",
+	registered_doors = {},
+	registered_trapdoors = {}
+}
 
 -- returns an object to a door object or nil
 function doors.get(pos)
 	local node_name = minetest.get_node(pos).name
-	if _doors.registered_doors[node_name] then
+	if doors.registered_doors[node_name] then
 		-- A normal upright door
 		return {
 			pos = pos,
@@ -27,23 +25,23 @@ function doors.get(pos)
 				if self:state() then
 					return false
 				end
-				return _doors.door_toggle(self.pos, nil, player)
+				return doors.door_toggle(self.pos, nil, player)
 			end,
 			close = function(self, player)
 				if not self:state() then
 					return false
 				end
-				return _doors.door_toggle(self.pos, nil, player)
+				return doors.door_toggle(self.pos, nil, player)
 			end,
 			toggle = function(self, player)
-				return _doors.door_toggle(self.pos, nil, player)
+				return doors.door_toggle(self.pos, nil, player)
 			end,
 			state = function(self)
 				local state = minetest.get_meta(self.pos):get_int("state")
 				return state %2 == 1
 			end
 		}
-	elseif _doors.registered_trapdoors[node_name] then
+	elseif doors.registered_trapdoors[node_name] then
 		-- A trapdoor
 		return {
 			pos = pos,
@@ -51,16 +49,16 @@ function doors.get(pos)
 				if self:state() then
 					return false
 				end
-				return _doors.trapdoor_toggle(self.pos, nil, player)
+				return doors.trapdoor_toggle(self.pos, nil, player)
 			end,
 			close = function(self, player)
 				if not self:state() then
 					return false
 				end
-				return _doors.trapdoor_toggle(self.pos, nil, player)
+				return doors.trapdoor_toggle(self.pos, nil, player)
 			end,
 			toggle = function(self, player)
-				return _doors.trapdoor_toggle(self.pos, nil, player)
+				return doors.trapdoor_toggle(self.pos, nil, player)
 			end,
 			state = function(self)
 				return minetest.get_node(self.pos).name:sub(-5) == "_open"
@@ -131,7 +129,7 @@ local transform = {
 	},
 }
 
-function _doors.door_toggle(pos, node, clicker)
+function doors.door_toggle(pos, node, clicker)
 	local meta = minetest.get_meta(pos) ; if not meta then return false end
 	node = node or minetest.get_node(pos)
 	local def = minetest.registered_nodes[node.name]
@@ -175,6 +173,14 @@ function _doors.door_toggle(pos, node, clicker)
 	end
 
 	local dir = node.param2
+
+	-- It's possible param2 is messed up, so, validate before using
+	-- the input data. This indicates something may have rotated
+	-- the door, even though that is not supported.
+	if not transform[state + 1] or not transform[state + 1][dir + 1] then
+		return false
+	end
+
 	if state % 2 == 0 then
 		minetest.sound_play(def.door.sounds[1], {pos = pos, gain = 0.3, max_hear_distance = 10})
 	else
@@ -272,7 +278,8 @@ function doors.register(name, def)
 			local node = minetest.get_node(pointed_thing.under)
 			local pdef = minetest.registered_nodes[node.name]
 			if pdef and pdef.on_rightclick and
-					not placer:get_player_control().sneak then
+					not (placer and placer:is_player() and
+					placer:get_player_control().sneak) then
 				return pdef.on_rightclick(pointed_thing.under,
 						node, placer, itemstack, pointed_thing)
 			end
@@ -296,12 +303,12 @@ function doors.register(name, def)
 				return itemstack
 			end
 
-			local pn = placer:get_player_name()
+			local pn = placer and placer:get_player_name() or ""
 			if minetest.is_protected(pos, pn) or minetest.is_protected(above, pn) then
 				return itemstack
 			end
 
-			local dir = minetest.dir_to_facedir(placer:get_look_dir())
+			local dir = placer and minetest.dir_to_facedir(placer:get_look_dir()) or 0
 
 			local ref = {
 				{ x = -1, y = 0, z = 0 },
@@ -375,7 +382,7 @@ function doors.register(name, def)
 	}
 
 	def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-		_doors.door_toggle(pos, node, clicker)
+		doors.door_toggle(pos, node, clicker)
 		return itemstack
 	end
 	def.after_dig_node = function(pos, node, meta, digger)
@@ -417,8 +424,8 @@ function doors.register(name, def)
 	def.mesh = "door_b.obj"
 	minetest.register_node(":" .. name .. "_b", def)
 
-	_doors.registered_doors[name .. "_a"] = true
-	_doors.registered_doors[name .. "_b"] = true
+	doors.registered_doors[name .. "_a"] = true
+	doors.registered_doors[name .. "_b"] = true
 end
 
 doors.register("door_wood", {
@@ -505,7 +512,7 @@ end
 
 ----trapdoor----
 
-function _doors.trapdoor_toggle(pos, node, clicker)
+function doors.trapdoor_toggle(pos, node, clicker)
 	node = node or minetest.get_node(pos)
 	if clicker and not minetest.check_player_privs(clicker, "protection_bypass") then
 		local meta = minetest.get_meta(pos) ; if not meta then return false end
@@ -545,7 +552,7 @@ function doors.register_trapdoor(name, def)
 	local name_opened = name.."_open"
 
 	def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-		_doors.trapdoor_toggle(pos, node, clicker)
+		doors.trapdoor_toggle(pos, node, clicker)
 		return itemstack
 	end
 
@@ -622,8 +629,8 @@ function doors.register_trapdoor(name, def)
 	minetest.register_node(name_opened, def_opened)
 	minetest.register_node(name_closed, def_closed)
 
-	_doors.registered_trapdoors[name_opened] = true
-	_doors.registered_trapdoors[name_closed] = true
+	doors.registered_trapdoors[name_opened] = true
+	doors.registered_trapdoors[name_closed] = true
 end
 
 doors.register_trapdoor("doors:trapdoor", {
