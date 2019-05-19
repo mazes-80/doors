@@ -387,7 +387,6 @@ function doors.register(name, def)
 	end
 	def.after_dig_node = function(pos, node, meta, digger)
 		minetest.remove_node({x = pos.x, y = pos.y + 1, z = pos.z})
-		--nodeupdate({x = pos.x, y = pos.y + 1, z = pos.z})
 		minetest.check_for_falling({x = pos.x, y = pos.y + 1, z = pos.z})
 	end
 	def.on_rotate = false
@@ -604,11 +603,14 @@ function doors.register_trapdoor(name, def)
 		type = "fixed",
 		fixed = {-0.5, -0.5, -0.5, 0.5, -6/16, 0.5}
 	}
-	def_closed.tiles = {def.tile_front,
+	def_closed.tiles = {
+		def.tile_front,
 		def.tile_front .. '^[transformFY',
-		def.tile_side, def.tile_side,
-		def.tile_side, def.tile_side}
-
+		def.tile_side,
+		def.tile_side,
+		def.tile_side,
+		def.tile_side
+	}
 	def_opened.node_box = {
 		type = "fixed",
 		fixed = {-0.5, -0.5, 6/16, 0.5, 0.5, 0.5}
@@ -617,11 +619,14 @@ function doors.register_trapdoor(name, def)
 		type = "fixed",
 		fixed = {-0.5, -0.5, 6/16, 0.5, 0.5, 0.5}
 	}
-	def_opened.tiles = { def.tile_side, def.tile_side,
-			def.tile_side .. '^[transform3',
-			def.tile_side .. '^[transform1',
-			def.tile_front .. '^[transform46',
-			def.tile_front .. '^[transform6'}
+	def_opened.tiles = {
+		def.tile_side,
+		def.tile_side .. '^[transform2',
+		def.tile_side .. '^[transform3',
+		def.tile_side .. '^[transform1',
+		def.tile_front .. '^[transform46',
+		def.tile_front .. '^[transform6'
+	}
 
 	def_opened.drop = name_closed
 	def_opened.groups.not_in_creative_inventory = 1
@@ -754,9 +759,9 @@ minetest.register_craft({
 })
 
 -- remove default key
-if minetest.registered_craftitems["default:skeleton_key"] then
-	minetest.clear_craft({output = "default:skeleton_key"})
-end
+--if minetest.registered_craftitems["default:skeleton_key"] then
+--	minetest.clear_craft({output = "default:skeleton_key"})
+--end
 
 ----fence gate----
 
@@ -818,8 +823,8 @@ function doors.register_fencegate(name, def)
 	minetest.register_craft({
 		output = name .. "_closed",
 		recipe = {
-			{"default:stick", def.material, "default:stick"},
-			{"default:stick", def.material, "default:stick"}
+			{"group:stick", def.material, "group:stick"},
+			{"group:stick", def.material, "group:stick"}
 		}
 	})
 end
