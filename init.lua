@@ -605,7 +605,7 @@ function doors.register_trapdoor(name, def)
 	}
 	def_closed.tiles = {
 		def.tile_front,
-		def.tile_front .. '^[transformFY',
+		def.tile_front .. "^[transformFY",
 		def.tile_side,
 		def.tile_side,
 		def.tile_side,
@@ -621,11 +621,11 @@ function doors.register_trapdoor(name, def)
 	}
 	def_opened.tiles = {
 		def.tile_side,
-		def.tile_side .. '^[transform2',
-		def.tile_side .. '^[transform3',
-		def.tile_side .. '^[transform1',
-		def.tile_front .. '^[transform46',
-		def.tile_front .. '^[transform6'
+		def.tile_side .. "^[transform2",
+		def.tile_side .. "^[transform3",
+		def.tile_side .. "^[transform1",
+		def.tile_front .. "^[transform46",
+		def.tile_front .. "^[transform6"
 	}
 
 	def_opened.drop = name_closed
@@ -660,19 +660,19 @@ doors.register_trapdoor("doors:trapdoor_steel", {
 })
 
 minetest.register_craft({
-	output = 'doors:trapdoor 2',
+	output = "doors:trapdoor 2",
 	recipe = {
-		{'group:wood', 'group:wood', 'group:wood'},
-		{'group:wood', 'group:wood', 'group:wood'},
-		{'', '', ''},
+		{"group:wood", "group:wood", "group:wood"},
+		{"group:wood", "group:wood", "group:wood"},
+		{"", "", ""},
 	}
 })
 
 minetest.register_craft({
-	output = 'doors:trapdoor_steel',
+	output = "doors:trapdoor_steel",
 	recipe = {
-		{'default:steel_ingot', 'default:steel_ingot'},
-		{'default:steel_ingot', 'default:steel_ingot'},
+		{"default:steel_ingot", "default:steel_ingot"},
+		{"default:steel_ingot", "default:steel_ingot"},
 	}
 })
 
