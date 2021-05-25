@@ -853,6 +853,7 @@ minetest.register_tool("doors:key", {
 
 			-- flip protected to normal
 			if player_name == prot then
+				infotext = " "
 				owner = ""
 				prot = ""
 				ok = 1
@@ -865,13 +866,13 @@ minetest.register_tool("doors:key", {
 			meta:set_string("doors_owner", owner)
 			meta:set_string("doors_protected", prot)
 
-			if not minetest.setting_getbool("creative_mode") then
+			if not minetest.settings:get_bool("creative_mode") then
 				itemstack:add_wear(65535 / 50)
 			end
 		end
 
 		return itemstack
-	end,
+	end
 })
 
 minetest.register_craft({
