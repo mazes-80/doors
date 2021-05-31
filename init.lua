@@ -537,6 +537,7 @@ doors.register("door_wood", {
 	}
 })
 
+
 doors.register("door_steel", {
 	tiles = {{name = "doors_door_steel.png", backface_culling = true}},
 	description = "Steel Door",
@@ -582,6 +583,33 @@ doors.register("door_obsidian_glass", {
 		{"default:obsidian_glass", "default:obsidian_glass"},
 		{"default:obsidian_glass", "default:obsidian_glass"},
 		{"default:obsidian_glass", "default:obsidian_glass"}
+	}
+})
+
+
+-- special doors (CC0 textures by Phiwari123 and IceAgeComing)
+doors.register("door_phiwari", {
+	tiles = {{name = "doors_door_phiwari.png", backface_culling = true}},
+	description = "Phiwari's Wooden Door",
+	inventory_image = "doors_item_phiwari.png",
+	groups = {node = 1, choppy = 2, oddly_breakable_by_hand = 2, flammable = 2},
+	recipe = {
+		{"group:wood", "default:obsidian_glass"},
+		{"group:wood", "group:wood"},
+		{"group:wood", "group:wood"}
+	}
+})
+
+
+doors.register("door_iceage", {
+	tiles = {{name = "doors_door_iceage.png", backface_culling = true}},
+	description = "IceAge's Wooden Door",
+	inventory_image = "doors_item_iceage.png",
+	groups = {node = 1, choppy = 2, oddly_breakable_by_hand = 2, flammable = 2},
+	recipe = {
+		{"group:wood", "default:iron_lump"},
+		{"group:wood", "group:wood"},
+		{"group:wood", "group:wood"}
 	}
 })
 
