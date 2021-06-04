@@ -515,10 +515,14 @@ function doors.register(name, def)
 	def.collision_box = {type = "fixed", fixed = { -1/2,-1/2,-1/2,1/2,3/2,-6/16}}
 
 	def.mesh = "door_a.obj"
-	minetest.register_node(":" .. name .. "_a", def)
+	minetest.register_node(":" .. name .. "_a", table.copy(def))
+
+	minetest.register_alias(name .. "_c", name .. "_b")
 
 	def.mesh = "door_b.obj"
-	minetest.register_node(":" .. name .. "_b", def)
+	minetest.register_node(":" .. name .. "_b", table.copy(def))
+
+	minetest.register_alias(name .. "_d", name .. "_a")
 
 	doors.registered_doors[name .. "_a"] = true
 	doors.registered_doors[name .. "_b"] = true
