@@ -6,6 +6,18 @@ doors = {
 	registered_trapdoors = {}
 }
 
+-- cache creative
+local creative = minetest.settings:get_bool("creative_mode")
+
+function is_creative_enabled_for(name)
+
+	if creative or minetest.check_player_privs(name, {creative = true}) then
+		return true
+	end
+
+	return false
+end
+
 
 local function replace_old_owner_information(pos)
 
@@ -422,7 +434,7 @@ function doors.register(name, def)
 				meta:set_string("infotext", "Owned by " .. pn)
 			end
 
-			if not minetest.is_creative_enabled(pn) then
+			if not is_creative_enabled_for(pn) then
 				itemstack:take_item()
 			end
 
@@ -733,7 +745,7 @@ function doors.register_trapdoor(name, def)
 			meta:set_string("owner", pn)
 			meta:set_string("infotext", "Owned by "..pn)
 
-			return minetest.is_creative_enabled(pn)
+			return is_creative_enabled_for(pn)
 		end
 
 		def.on_blast = function() end
@@ -909,7 +921,7 @@ minetest.register_tool("doors:key", {
 			meta:set_string("owner", owner)
 			meta:set_string("doors_protected", prot)
 
-			if not minetest.is_creative_enabled(player_name) then
+			if not is_creative_enabled_for(player_name) then
 				itemstack:add_wear(65535 / 50)
 			end
 		end
