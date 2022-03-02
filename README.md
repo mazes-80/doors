@@ -1,44 +1,74 @@
-Doors Redo (Edited by TenPlus1)
+minetest mod Doors Redo
+=========================
 
-Based on
+This mod improves doors and adds a master key to control door states.
 
-Minetest Game mod: doors
-========================
-See license.txt for license information.
-
-
-Usage
------
-
-Doors Redo allows the player to craft a key tool which can be used on any of the
-registered doors to flip between states (open, owned, protected)
-
-
-Key Tool
---------
-
-The key tool is crafted using 5x steel ingots (2x2 box in lower left and 1 in
-top right).  When held in players hand you can punch a door to flip between each
-state to open, lock (own) and protect the door.
-
-
-Door States
+Information
 -----------
 
-OPEN - Doors can be opened by any player or dug up.
+This mod must be named `doors` a improvement version of the built-in Doors mod
+also featured the player to craft a key tool which can be used on any of the
+registered doors to flip between states (open, owned, protected)
 
-OWNED - This locks the door so that only the owner can open or dig the door.
+![screenshot.jpg](screenshot.jpg)
 
-PROTECTED - This also locks the door so that only the players listed for the
-protected area the door sits inside can open the door.
+Tech information
+----------------
+
+This mod overrides the default doors mod in minetest_game.
+
+#### Door States
+
+* OPEN - This is like default Doors mod, can be opened by any player or dug up.
+* OWNED - This locks the door so that only the owner can open or dig the door.
+* PROTECTED - This locks the door but based on protected area the door sits inside.
 
 Note: A protection mod must be installed to use Protected mode so that it works
 properly, not having one running will mean all protected doors will open for
 anyone who uses them.
 
+#### Dependencies
 
-Authors of source code
-----------------------
+* default
+
+Optional dependences:
+
+* screwdriver
+* protector
+
+#### Nodes
+
+| Node name               | Description name      |
+| ----------------------- | --------------------- |
+| doors:hidden            | Hidden Door Segment   |
+| doors:trapdoor          | Trapdoor              |
+| doors:trapdoor_steel    | Steel Trapdoor        |
+| doors:door_steel        | Steel Door            |
+| doors:door_glass        | Glass Door            |
+| doors:door_obsidian_glass | Obsidian Glass Door |
+| doors:door_phiwari      | Phiwari's Wooden Door |
+| doors:door_iceage       | IceAge's Wooden Door  |
+| doors:gate_wood         | Wooden Fence Gate     |
+| doors:gate_acacia_wood  | Acacia Fence Gate     |
+| doors:gate_junglewood   | Junglewood Fence Gate |
+| doors:gate_pine_wood    | Pine Fence Gate       |
+| doors:gate_aspen_wood   | Aspen Fence Gate      |
+
+#### Items tools
+
+The key tool is crafted using 5x steel ingots (2x2 box in lower left and 1 in
+top right).  When held in players hand you can punch a door to flip between each
+state to open, lock (own) and protect the door.
+
+| Node item             | Description name      |
+| --------------------- | --------------------- |
+| doors:key             | Key Tool              |
+
+License
+-------
+
+#### Authors of source code
+
 Originally by PilzAdam (MIT)
 
 Modified by BlockMen (MIT): Added sounds, glass doors (glass, obsidian glass) and trapdoor.
@@ -51,9 +81,10 @@ Added Fence Gate model, code, and sounds.
 
 Various Minetest developers and contributors (MIT)
 
+Finally featured by TenPlus1
 
-Authors of media (textures)
----------------------------
+#### Authors of media (textures)
+
 Following textures created by Fernando Zapata (CC BY-SA 3.0):
   door_wood.png
   door_wood_a.png
@@ -95,9 +126,8 @@ All other textures (created by PilzAdam) (CC BY-SA 3.0):
 Door textures were converted to the new texture map by sofar, paramat and
 red-001, under the same license as the originals.
 
+#### Authors of media (models)
 
-Authors of media (models)
--------------------------
 Door 3d models by sofar (CC-BY-SA-3.0)
  - door_a.obj
  - door_b.obj
@@ -106,8 +136,8 @@ Fence gate models by sofar (CC-BY-SA-3.0)
  - fencegate_closed.obj
 
 
-Authors of media (sounds)
--------------------------
+#### Authors of media (sounds)
+
 Opening-Sound created by CGEffex (CC BY 3.0), modified by BlockMen
   door_open.ogg
 Closing-Sound created by bennstir (CC BY 3.0)
@@ -123,3 +153,6 @@ Steel door sounds open & close (CC-BY-3.0) by HazMatt
   doors_steel_door_close.ogg
 doors_glass_door_open.ogg, doors_glass_door_close.ogg:
   https://www.freesound.org/people/SkeetMasterFunk69/sounds/235546/ (CC0 1.0)
+
+
+Check [license.txt](license.txt)
