@@ -43,6 +43,7 @@ Optional dependences:
 | doors:hidden            | Hidden Door Segment   |
 | doors:trapdoor          | Trapdoor              |
 | doors:trapdoor_steel    | Steel Trapdoor        |
+| doors:trapdoor_oak      | Oak Trapdoor          |
 | doors:door_steel        | Steel Door            |
 | doors:door_glass        | Glass Door            |
 | doors:door_obsidian_glass | Obsidian Glass Door |
@@ -95,6 +96,10 @@ Following textures created by Fernando Zapata (CC BY-SA 3.0):
 Following textures created by BlockMen (CC BY-SA 3.0):
   door_trapdoor.png
   door_obsidian_glass_side.png
+
+Following textures created by sorcerykid (CC BY-SA 3.0):
+  door_trapdoor_oak.png
+  door_trapdoor_oak_side.png
 
 Following textures created by celeron55 (CC BY-SA 3.0):
   door_glass_a.png

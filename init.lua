@@ -826,6 +826,15 @@ doors.register_trapdoor("doors:trapdoor", {
 	groups = {choppy = 2, oddly_breakable_by_hand = 2, flammable = 2, door = 1}
 })
 
+minetest.register_craft({
+	output = "doors:trapdoor 2",
+	recipe = {
+		{"group:wood", "group:wood", "group:wood"},
+		{"group:wood", "group:wood", "group:wood"},
+		{"", "", ""}
+	}
+})
+
 doors.register_trapdoor("doors:trapdoor_steel", {
 	description = "Steel Trapdoor",
 	inventory_image = "doors_trapdoor_steel.png",
@@ -839,19 +848,29 @@ doors.register_trapdoor("doors:trapdoor_steel", {
 })
 
 minetest.register_craft({
-	output = "doors:trapdoor 2",
-	recipe = {
-		{"group:wood", "group:wood", "group:wood"},
-		{"group:wood", "group:wood", "group:wood"},
-		{"", "", ""}
-	}
-})
-
-minetest.register_craft({
 	output = "doors:trapdoor_steel",
 	recipe = {
 		{"default:steel_ingot", "default:steel_ingot"},
 		{"default:steel_ingot", "default:steel_ingot"}
+	}
+})
+
+-- based on castle_2 texture by sorcerykid's extra_doors mod
+doors.register_trapdoor("doors:trapdoor_oak", {
+	description = "Oak Trapdoor",
+	inventory_image = "doors_trapdoor_oak.png",
+	wield_image = "doors_trapdoor_oak.png",
+	tile_front = "doors_trapdoor_oak.png",
+	tile_side = "doors_trapdoor_oak_side.png",
+	groups = {choppy = 1, oddly_breakable_by_hand = 1, flammable = 2, door = 1}
+})
+
+minetest.register_craft({
+	output = "doors:trapdoor_oak 3",
+	recipe = {
+		{"group:wood", "group:wood", "group:wood"},
+		{"group:wood", "default:tree", "group:wood"},
+		{"", "", ""}
 	}
 })
 
