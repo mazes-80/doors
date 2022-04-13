@@ -1094,6 +1094,12 @@ minetest.register_craft({
 
 minetest.register_craft({
 	type = "fuel",
+	recipe = "doors:trapdoor_oak",
+	burntime = 10
+})
+
+minetest.register_craft({
+	type = "fuel",
 	recipe = "doors:door_wood",
 	burntime = 14
 })
