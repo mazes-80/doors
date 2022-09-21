@@ -123,59 +123,82 @@ function doors.get(pos)
 	end
 end
 
+local can_dig_door = function(pos, digger)
+
+	if not (digger and digger:is_player()) then return false end
+
+	if minetest.check_player_privs(digger, "protection_bypass") then
+		return true
+	end
+
+	replace_old_owner_information(pos)
+
+	local meta = minetest.get_meta(pos) ; if not meta then return false end
+	local owner = meta:get_string("owner")
+	local prot = meta:get_string("doors_protected")
+	local pname = digger:get_player_name()
+
+	if prot ~= "" and ( prot == pname or not minetest.is_protected(pos, pname) ) then
+		return true
+	elseif prot ~= "" then
+--		minetest.record_protection_violation(pos, pname)
+		return false
+	end
+
+	if owner ~= "" and pname == owner then
+		return true
+	elseif owner ~= "" then
+--		minetest.record_protection_violation(pos, pname)
+		return false
+	end
+
+	if not minetest.is_protected(pos, pname) then
+		return true
+	end
+
+--	minetest.record_protection_violation(pos, pname)
+
+	return false
+end
+
 
 local can_toggle = function(clicker, pos)
 
-	if not (clicker and clicker:is_player()) then return false end
-
-	if minetest.check_player_privs(clicker, "protection_bypass") then
-		return true
-	end
-
-	local meta = minetest.get_meta(pos) ; if not meta then return false end
-	local owner = meta:get_string("owner") or ""
-	local prot = meta:get_string("doors_protected") or ""
-	local name = clicker:get_player_name()
-
-	-- can open protected door
-	if prot ~= "" and not minetest.is_protected(pos, name) then
-		return true
-	end
-
-	-- owns locked door
-	if owner ~= "" and name == owner then
-		return true
-	end
-
-	-- door not protected or owned
-	if owner == "" and prot == "" then
+	if can_dig_door(pos, clicker) then
 		return true
 	end
 
 	local item = clicker:get_wielded_item()
 
-	-- not holding key
 	if minetest.get_item_group(item:get_name(), "key") ~= 1 then
+--		minetest.record_protection_violation(pos, clicker:get_player_name())
 		return false
 	end
 
 	local key_meta = item:get_meta()
 
-	-- key doesn't match
 	if key_meta:get_string("secret") == "" then
 
 		local key_oldmeta = item:get_metadata()
 
 		if key_oldmeta == "" or not minetest.parse_json(key_oldmeta) then
+--			minetest.record_protection_violation(pos, clicker:get_player_name())
 			return false
 		end
 
 		key_meta:set_string("secret", minetest.parse_json(key_oldmeta).secret)
-
 		item:set_metadata("")
 	end
 
-	return meta:get_string("key_lock_secret") == key_meta:get_string("secret")
+	local meta = minetest.get_meta(pos)
+
+	if meta:get_string("key_lock_secret") == key_meta:get_string("secret") then
+		return true
+	end
+
+--	minetest.record_protection_violation(pos, clicker:get_player_name())
+
+	return false
 end
 
 
@@ -331,20 +354,6 @@ local function on_place_node(place_to, newnode, placer, oldnode, itemstack, poin
 		callback(place_to_copy, newnode_copy, placer, oldnode_copy, itemstack,
 				pointed_thing_copy)
 	end
-end
-
-
-local function can_dig_door(pos, digger)
-
-	replace_old_owner_information(pos)
-
-	local digger_name = digger and digger:get_player_name()
-
-	if digger_name and minetest.get_player_privs(digger_name).protection_bypass then
-		return true
-	end
-
-	return minetest.get_meta(pos):get_string("owner") == digger_name
 end
 
 
