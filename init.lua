@@ -118,12 +118,15 @@ function doors.get(pos)
 				return minetest.get_node(self.pos).name:sub(-5) == "_open"
 			end
 		}
-	else
-		return nil
 	end
+
+	return nil
 end
 
-local can_dig_door = function(pos, digger)
+
+-- level = true for standard door open/close check
+-- level = nil to be able to actually dig door
+local can_dig_door = function(pos, digger, level)
 
 	if not (digger and digger:is_player()) then return false end
 
@@ -138,25 +141,29 @@ local can_dig_door = function(pos, digger)
 	local prot = meta:get_string("doors_protected")
 	local pname = digger:get_player_name()
 
-	if prot ~= "" and ( prot == pname or not minetest.is_protected(pos, pname) ) then
-		return true
-	elseif prot ~= "" then
---		minetest.record_protection_violation(pos, pname)
-		return false
+	if level then
+
+		-- open normal door
+		if prot == "" and owner == "" then
+			return true
+		end
+
+		-- open protected door
+		if prot ~= "" and not minetest.is_protected(pos, pname) then
+			return true
+		end
+	else
+
+		-- dig protected door
+		if prot ~= "" and prot == pname then
+			return true
+		end
 	end
 
+	-- open own locked door
 	if owner ~= "" and pname == owner then
 		return true
-	elseif owner ~= "" then
---		minetest.record_protection_violation(pos, pname)
-		return false
 	end
-
-	if not minetest.is_protected(pos, pname) then
-		return true
-	end
-
---	minetest.record_protection_violation(pos, pname)
 
 	return false
 end
@@ -164,7 +171,7 @@ end
 
 local can_toggle = function(clicker, pos)
 
-	if can_dig_door(pos, clicker) then
+	if can_dig_door(pos, clicker, true) then
 		return true
 	end
 
@@ -520,19 +527,9 @@ function doors.register(name, def)
 	end
 
 	def.recipe = nil
-
-	if not def.sounds then
-		def.sounds = default.node_sound_wood_defaults()
-	end
-
-	if not def.sound_open then
-		def.sound_open = "doors_door_open"
-	end
-
-	if not def.sound_close then
-		def.sound_close = "doors_door_close"
-	end
-
+	def.sounds = def.sounds or default.node_sound_wood_defaults()
+	def.sound_open = def.sound_open or "doors_door_open"
+	def.sound_close = def.sound_close or "doors_door_close"
 	def.groups.not_in_creative_inventory = 1
 	def.groups.door = 1
 	def.drop = name
@@ -840,21 +837,18 @@ function doors.register_trapdoor(name, def)
 	def.use_texture_alpha = def.use_texture_alpha or "clip"
 	def.is_ground_content = false
 
-	if def.protected then
-
-		def.after_place_node = function(pos, placer, itemstack, pointed_thing)
-
-			local pn = placer:get_player_name()
-			local meta = minetest.get_meta(pos)
-
-			meta:set_string("owner", pn)
-			meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
-
-			return minetest.is_creative_enabled(pn)
-		end
-	end
-
 	def.can_dig = can_dig_door
+
+	def.after_place_node = function(pos, placer, itemstack, pointed_thing)
+
+		local pn = placer:get_player_name()
+		local meta = minetest.get_meta(pos)
+
+		meta:set_string("owner", pn)
+		meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
+
+		return minetest.is_creative_enabled(pn)
+	end
 
 	def.on_key_use = function(pos, player)
 
@@ -910,10 +904,7 @@ function doors.register_trapdoor(name, def)
 		return {name}
 	end
 
-	if not def.sounds then
-		def.sounds = default.node_sound_wood_defaults()
-	end
-
+	def.sounds = def.sounds or default.node_sound_wood_defaults()
 	def.sound_open = def.sound_open or "doors_door_open"
 	def.sound_close = def.sound_clode or "doors_door_close"
 	def.gain_open = def.gain_open or 0.2
