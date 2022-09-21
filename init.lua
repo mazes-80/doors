@@ -563,45 +563,47 @@ function doors.register(name, def)
 		return false
 	end
 
-	if def.protected then
-		def.can_dig = can_dig_door
+	def.can_dig = can_dig_door
 
-		def.on_key_use = function(pos, player)
+	def.on_key_use = function(pos, player)
 
-			local door = doors.get(pos)
+		local door = doors.get(pos)
 
-			door:toggle(player)
-		end
-
-		def.on_skeleton_key_use = function(pos, player, newsecret)
-
-			replace_old_owner_information(pos)
-
-			local meta = minetest.get_meta(pos)
-			local owner = meta:get_string("owner")
-			local pname = player:get_player_name()
-			local prot  = meta:get_string("doors_protected")
-
-			-- TODO same as in can_dig_door every member should be able to share keys
-			-- verify placer is owner of lockable door
-			if owner ~= pname and prot ~= pname then
-				minetest.record_protection_violation(pos, pname)
-				minetest.chat_send_player(pname, S("You do not own this locked door."))
-				return nil
-			end
-
-			local secret = meta:get_string("key_lock_secret")
-
-			if secret == "" then
-				secret = newsecret
-				meta:set_string("key_lock_secret", secret)
-			end
-
-			return secret, S("a locked door"), owner
-		end
-
-		def.node_dig_prediction = ""
+		door:toggle(player)
 	end
+
+	def.on_skeleton_key_use = function(pos, player, newsecret)
+
+		replace_old_owner_information(pos)
+
+		local meta = minetest.get_meta(pos)
+		local owner = meta:get_string("owner")
+		local pname = player:get_player_name()
+		local prot  = meta:get_string("doors_protected")
+
+		-- Door is neither owned not protected
+		if owner == "" and prot == "" then
+			return nil
+		end
+
+		-- verify placer is owner of lockable door
+		if owner ~= pname and prot ~= pname then
+			minetest.record_protection_violation(pos, pname)
+			minetest.chat_send_player(pname, S("You do not own this locked door."))
+			return nil
+		end
+
+		local secret = meta:get_string("key_lock_secret")
+
+		if secret == "" then
+			secret = newsecret
+			meta:set_string("key_lock_secret", secret)
+		end
+
+		return secret, S("a locked door"), owner
+	end
+
+	def.node_dig_prediction = ""
 
 	def.on_blast = function(pos, intensity)
 
@@ -852,43 +854,47 @@ function doors.register_trapdoor(name, def)
 
 			return minetest.is_creative_enabled(pn)
 		end
-
-		def.on_key_use = function(pos, player)
-
-			local door = doors.get(pos)
-
-			door:toggle(player)
-		end
-
-		def.on_skeleton_key_use = function(pos, player, newsecret)
-
-			replace_old_owner_information(pos)
-
-			local meta = minetest.get_meta(pos)
-			local owner = meta:get_string("owner")
-			local pname = player:get_player_name()
-			local prot  = meta:get_string("doors_protected")
-
-			-- TODO same as in can_dig_door every member should be able to share keys
-			-- verify placer is owner of lockable door
-			if owner ~= pname and prot ~= pname then
-				minetest.record_protection_violation(pos, pname)
-				minetest.chat_send_player(pname, S("You do not own this trapdoor."))
-				return nil
-			end
-
-			local secret = meta:get_string("key_lock_secret")
-
-			if secret == "" then
-				secret = newsecret
-				meta:set_string("key_lock_secret", secret)
-			end
-
-			return secret, S("a locked trapdoor"), owner
-		end
-
-		def.node_dig_prediction = ""
 	end
+
+	def.on_key_use = function(pos, player)
+
+		local door = doors.get(pos)
+
+		door:toggle(player)
+	end
+
+	def.on_skeleton_key_use = function(pos, player, newsecret)
+
+		replace_old_owner_information(pos)
+
+		local meta = minetest.get_meta(pos)
+		local owner = meta:get_string("owner")
+		local pname = player:get_player_name()
+		local prot  = meta:get_string("doors_protected")
+
+		-- Door is neither owned not protected
+		if owner == "" and prot == "" then
+			return nil
+		end
+
+		-- verify placer is owner of lockable door
+		if owner ~= pname and prot ~= pname then
+			minetest.record_protection_violation(pos, pname)
+			minetest.chat_send_player(pname, S("You do not own this trapdoor."))
+			return nil
+		end
+
+		local secret = meta:get_string("key_lock_secret")
+
+		if secret == "" then
+			secret = newsecret
+			meta:set_string("key_lock_secret", secret)
+		end
+
+		return secret, S("a locked trapdoor"), owner
+	end
+
+	def.node_dig_prediction = ""
 
 	def.on_blast = function(pos, intensity)
 
