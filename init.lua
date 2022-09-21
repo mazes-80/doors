@@ -842,8 +842,6 @@ function doors.register_trapdoor(name, def)
 
 	if def.protected then
 
-		def.can_dig = can_dig_door
-
 		def.after_place_node = function(pos, placer, itemstack, pointed_thing)
 
 			local pn = placer:get_player_name()
@@ -855,6 +853,8 @@ function doors.register_trapdoor(name, def)
 			return minetest.is_creative_enabled(pn)
 		end
 	end
+
+	def.can_dig = can_dig_door
 
 	def.on_key_use = function(pos, player)
 
