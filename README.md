@@ -1,21 +1,17 @@
 minetest mod Doors Redo
 =========================
 
-This mod improves doors and adds a master key to control door states.
-
 Information
 -----------
 
-This mod must be named `doors` a improvement version of the built-in Doors mod
-also featured the player to craft a key tool which can be used on any of the
-registered doors to flip between states (open, owned, protected)
+This mod replaces the default `doors` mod and adds a new tool that can flip
+between (open, locked, protected) states of any door or trapdoor.  Master keys
+can still be used to give players access to your locked doors.
 
 ![screenshot.jpg](screenshot.jpg)
 
 Tech information
 ----------------
-
-This mod overrides the default doors mod in minetest_game.
 
 #### Door States
 
@@ -57,13 +53,13 @@ Optional dependences:
 
 #### Items tools
 
-The key tool is crafted using 5x steel ingots (2x2 box in lower left and 1 in
-top right).  When held in players hand you can punch a door to flip between each
-state to open, lock (own) and protect the door.
+The lock tool can be crafted (top middle is 1x gold ingot, 4x steel ingots either side of
+middle and bottom rows).  When held in players hand you can punch a door to flip between
+each state to open, lock (own) and protect the door.
 
 | Node item             | Description name      |
 | --------------------- | --------------------- |
-| doors:key             | Key Tool              |
+| doors:lock_tool       | Lock Tool             |
 
 License
 -------
@@ -124,7 +120,7 @@ Glass door textures by Krock and paramat based on textures by VanessaE (CC BY-SA
   doors_item_glass.png
 
 TenPlus1 (CC-BY-SA-3.0):
-  doors_key.png
+  doors_lock_tool.png
 
 All other textures (created by PilzAdam) (CC BY-SA 3.0):
 
