@@ -494,8 +494,6 @@ function doors.register(name, def)
 
 			if def.protected then
 
-				local pn = placer:get_player_name()
-
 				meta:set_string("owner", pn)
 				meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
 			end
