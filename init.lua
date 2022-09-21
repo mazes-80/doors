@@ -15,11 +15,10 @@ else
 	if minetest.get_modpath("intllib") then
 		dofile(minetest.get_modpath("intllib") .. "/init.lua")
 		if intllib.make_gettext_pair then
-			gettext, ngettext = intllib.make_gettext_pair() -- new gettext method
+			S = intllib.make_gettext_pair() -- new gettext method
 		else
-			gettext = intllib.Getter() -- old text file method
+			S = intllib.Getter() -- old text file method
 		end
-		S = gettext
 	else -- boilerplate function
 		S = function(str, ...)
 			local args = {...}
@@ -124,9 +123,7 @@ function doors.get(pos)
 end
 
 
--- level = true for standard door open/close check
--- level = nil to be able to actually dig door
-local can_dig_door = function(pos, digger, level)
+local can_dig_door = function(pos, digger)
 
 	if not (digger and digger:is_player()) then return false end
 
@@ -141,29 +138,25 @@ local can_dig_door = function(pos, digger, level)
 	local prot = meta:get_string("doors_protected")
 	local pname = digger:get_player_name()
 
-	if level then
-
-		-- open normal door
-		if prot == "" and owner == "" then
-			return true
-		end
-
-		-- open protected door
-		if prot ~= "" and not minetest.is_protected(pos, pname) then
-			return true
-		end
-	else
-
-		-- dig protected door
-		if prot ~= "" and prot == pname then
-			return true
-		end
+	if prot ~= "" and ( prot == pname or not minetest.is_protected(pos, pname) ) then
+		return true
+	elseif prot ~= "" then
+--		minetest.record_protection_violation(pos, pname)
+		return false
 	end
 
-	-- open own locked door
 	if owner ~= "" and pname == owner then
 		return true
+	elseif owner ~= "" then
+--		minetest.record_protection_violation(pos, pname)
+		return false
 	end
+
+	if not minetest.is_protected(pos, pname) then
+		return true
+	end
+
+--	minetest.record_protection_violation(pos, pname)
 
 	return false
 end
@@ -171,7 +164,15 @@ end
 
 local can_toggle = function(clicker, pos)
 
-	if can_dig_door(pos, clicker, true) then
+	if can_dig_door(pos, clicker) then
+		return true
+	end
+
+	local meta = minetest.get_meta(pos)
+	local owner = meta:get_string("owner")
+	local prot  = meta:get_string("doors_protected")
+
+	if owner == "" and prot == "" then
 		return true
 	end
 
@@ -196,8 +197,6 @@ local can_toggle = function(clicker, pos)
 		key_meta:set_string("secret", minetest.parse_json(key_oldmeta).secret)
 		item:set_metadata("")
 	end
-
-	local meta = minetest.get_meta(pos)
 
 	if meta:get_string("key_lock_secret") == key_meta:get_string("secret") then
 		return true
@@ -341,8 +340,6 @@ end
 local function on_place_node(place_to, newnode, placer, oldnode, itemstack, pointed_thing)
 
 	-- Run script hook
-	local _, callback
-
 	for _, callback in ipairs(minetest.registered_on_placenodes) do
 
 		-- Deepcopy pos, node and pointed_thing because callback can modify them
