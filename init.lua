@@ -838,6 +838,8 @@ function doors.register_trapdoor(name, def)
 
 	def.after_place_node = function(pos, placer, itemstack, pointed_thing)
 
+		if not def.protected then return end
+
 		local pn = placer:get_player_name()
 		local meta = minetest.get_meta(pos)
 
