@@ -136,13 +136,9 @@ local can_dig_door = function(pos, digger)
 	if prot ~= "" then
 		if prot == pname then
 			return true
-		elseif meta:get_string("doors_mode") == "2"
-		and not minetest.is_protected(pos, pname) then
-			return true
+		elseif meta:get_string("doors_mode") ~= "2" then
+			return false
 		end
-		return false
-	elseif prot ~= "" then
-		return false
 	end
 
 	return not minetest.is_protected(pos, pname)
@@ -164,7 +160,9 @@ local can_toggle = function(clicker, pos)
 	local owner = meta:get_string("owner")
 	local prot  = meta:get_string("doors_protected")
 
-	if owner == "" and prot == "" then
+	if prot ~= "" then
+		return not minetest.is_protected(pos, clicker:get_player_name())
+	elseif owner == "" then
 		return true
 	end
 
@@ -484,6 +482,8 @@ function doors.register(name, def)
 
 				meta:set_string("owner", pn)
 				meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
+			else
+				meta:set_string("doors_mode", "2")
 			end
 
 			if not minetest.is_creative_enabled(pn) then
@@ -567,7 +567,9 @@ function doors.register(name, def)
 		end
 
 		-- verify placer is owner of lockable door
-		if owner ~= pname and prot ~= pname then
+		if ( owner ~= pname and owner ~= "" ) or
+		( prot ~= pname and ( minetest.is_protected(pos, pname)
+		or meta:get_string("doors_mode") == "" )) then
 			minetest.record_protection_violation(pos, pname)
 			minetest.chat_send_player(pname, S("You do not own this locked door."))
 			return nil
@@ -837,10 +839,13 @@ function doors.register_trapdoor(name, def)
 
 	def.after_place_node = function(pos, placer, itemstack, pointed_thing)
 
-		if not def.protected then return end
+		local meta = minetest.get_meta(pos)
+		if not def.protected then
+			meta:set_string("doors_mode", "2")
+			return
+		end
 
 		local pn = placer:get_player_name()
-		local meta = minetest.get_meta(pos)
 
 		meta:set_string("owner", pn)
 		meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
@@ -864,13 +869,15 @@ function doors.register_trapdoor(name, def)
 		local pname = player:get_player_name()
 		local prot  = meta:get_string("doors_protected")
 
-		-- Door is neither owned not protected
+		-- Trap is neither owned not protected
 		if owner == "" and prot == "" then
 			return nil
 		end
 
-		-- verify placer is owner of lockable door
-		if owner ~= pname and prot ~= pname then
+		-- verify placer is owner of lockable trap
+		if ( owner ~= pname and owner ~= "" ) or
+		( prot ~= pname and ( minetest.is_protected(pos, pname)
+		or meta:get_string("doors_mode") == "" )) then
 			minetest.record_protection_violation(pos, pname)
 			minetest.chat_send_player(pname, S("You do not own this trapdoor."))
 			return nil
