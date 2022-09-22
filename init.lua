@@ -129,23 +129,23 @@ local can_dig_door = function(pos, digger)
 	local prot = meta:get_string("doors_protected")
 	local pname = digger:get_player_name()
 
-	if prot ~= "" and ( prot == pname or not minetest.is_protected(pos, pname) ) then
-		return true
+	if owner ~= "" then
+		return pname == owner
+	end
+
+	if prot ~= "" then
+		if prot == pname then
+			return true
+		elseif meta:get_string("doors_mode") == "2"
+		and not minetest.is_protected(pos, pname) then
+			return true
+		end
+		return false
 	elseif prot ~= "" then
 		return false
 	end
 
-	if owner ~= "" and pname == owner then
-		return true
-	elseif owner ~= "" then
-		return false
-	end
-
-	if not minetest.is_protected(pos, pname) then
-		return true
-	end
-
-	return false
+	return not minetest.is_protected(pos, pname)
 end
 
 
