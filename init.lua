@@ -1096,8 +1096,16 @@ minetest.register_tool("doors:lock_tool", {
 
 			-- flip owned to protected
 			if player_name == owner then
+				local mode = meta:get_string("doors_mode")
 				infotext = ItemStack(minetest.get_node(pos).name):get_description()
 					.. "\n" .. S("Protected by @1", player_name)
+				if mode == "1" then
+					infotext = infotext .. S(":  share key")
+				elseif mode == "2" then
+					infotext = infotext .. S(":  dig")
+				else
+					infotext = infotext .. S(":  toggle")
+				end
 				owner = ""
 				prot = player_name
 				ok = 1
@@ -1110,20 +1118,26 @@ minetest.register_tool("doors:lock_tool", {
 				if user:get_player_control().sneak then
 					-- Switch doors mode
 					local mode = meta:get_string("doors_mode")
+					infotext = ItemStack(minetest.get_node(pos).name):get_description()
+						.. "\n" .. S("Protected by @1", player_name)
 					if mode == "" then
-						mode = "1" -- access: toggle and share key
+						infotext = infotext .. S(":  share key")
+						mode = "1"
 					elseif mode == "1" then
-						mode = "2" -- access: toggle, share key, dig
+						infotext = infotext .. S(":  dig")
+						mode = "2"
 					elseif mode == "2" then
-						mode = ""  -- access: toggle
+						infotext = infotext .. S(":  toggle")
+						mode = ""
 					end
 					meta:set_string("doors_mode", mode)
+					prot = player_name
 				else -- flip protected to normal
 					infotext = " "
-					owner = ""
 					prot = ""
-					ok = 1
 				end
+				owner = ""
+				ok = 1
 			end
 		end
 
