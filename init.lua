@@ -12,20 +12,11 @@ local S
 if minetest.get_translator ~= nil then
 	S = minetest.get_translator("doors") -- 5.x translation function
 else
-	if minetest.get_modpath("intllib") then
-		dofile(minetest.get_modpath("intllib") .. "/init.lua")
-		if intllib.make_gettext_pair then
-			S = intllib.make_gettext_pair() -- new gettext method
-		else
-			S = intllib.Getter() -- old text file method
-		end
-	else -- boilerplate function
-		S = function(str, ...)
-			local args = {...}
-			return str:gsub("@%d+", function(match)
-				return args[tonumber(match:sub(2))]
-			end)
-		end
+	S = function(str, ...) -- boilerplate function
+		local args = {...}
+		return str:gsub("@%d+", function(match)
+			return args[tonumber(match:sub(2))]
+		end)
 	end
 end
 
@@ -141,22 +132,18 @@ local can_dig_door = function(pos, digger)
 	if prot ~= "" and ( prot == pname or not minetest.is_protected(pos, pname) ) then
 		return true
 	elseif prot ~= "" then
---		minetest.record_protection_violation(pos, pname)
 		return false
 	end
 
 	if owner ~= "" and pname == owner then
 		return true
 	elseif owner ~= "" then
---		minetest.record_protection_violation(pos, pname)
 		return false
 	end
 
 	if not minetest.is_protected(pos, pname) then
 		return true
 	end
-
---	minetest.record_protection_violation(pos, pname)
 
 	return false
 end
@@ -179,7 +166,6 @@ local can_toggle = function(clicker, pos)
 	local item = clicker:get_wielded_item()
 
 	if minetest.get_item_group(item:get_name(), "key") ~= 1 then
---		minetest.record_protection_violation(pos, clicker:get_player_name())
 		return false
 	end
 
@@ -190,7 +176,6 @@ local can_toggle = function(clicker, pos)
 		local key_oldmeta = item:get_metadata()
 
 		if key_oldmeta == "" or not minetest.parse_json(key_oldmeta) then
---			minetest.record_protection_violation(pos, clicker:get_player_name())
 			return false
 		end
 
@@ -201,8 +186,6 @@ local can_toggle = function(clicker, pos)
 	if meta:get_string("key_lock_secret") == key_meta:get_string("secret") then
 		return true
 	end
-
---	minetest.record_protection_violation(pos, clicker:get_player_name())
 
 	return false
 end
