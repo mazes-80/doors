@@ -239,10 +239,10 @@ local function on_dig_door(pos, node, digger)
 	end
 	local secret = core.get_meta(pos):get_string("key_lock_secret")
 	if secret ~= "" then
-		local stack
+		local stack, meta
 		for k, v in pairs(drops) do
 			stack = ItemStack(v)
-			stack:set_meta("key_lock_secret", secret)
+			meta = stack:get_meta():set_string("key_lock_secret", secret)
 			drops[k] = stack
 		end
 	end
@@ -578,6 +578,11 @@ function doors.register(name, def)
 				meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
 			else
 				meta:set_string("doors_mode", "2")
+			end
+
+			local secret = itemstack:get_meta():get_string("key_lock_secret")
+			if secret ~= "" then
+				meta:set_string("key_lock_secret", secret)
 			end
 
 			if not minetest.is_creative_enabled(pn) then
@@ -948,6 +953,11 @@ function doors.register_trapdoor(name, def)
 
 		meta:set_string("owner", pn)
 		meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
+
+		local secret = itemstack:get_meta():get_string("key_lock_secret")
+		if secret ~= "" then
+			meta:set_string("key_lock_secret", set_string)
+		end
 
 		return minetest.is_creative_enabled(pn)
 	end
