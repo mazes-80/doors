@@ -1102,6 +1102,7 @@ minetest.register_craft({
 minetest.register_alias("doors:key", "doors:lock_tool")
 
 ----fence gate----
+
 local fence_collision_extra = minetest.settings:get_bool("enable_fence_tall") and 3/8 or 0
 
 function doors.register_fencegate(name, def)
@@ -1270,4 +1271,11 @@ minetest.register_craft({
 	type = "fuel",
 	recipe = "doors:gate_aspen_wood_closed",
 	burntime = 5
+})
+
+-- old key into iron
+
+minetest.register_craft({
+	output = "default:iron_lump",
+	recipe = {{"default:key"}}
 })
