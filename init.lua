@@ -568,8 +568,9 @@ function doors.register(name, def)
 
 		-- verify placer is owner of lockable door
 		if ( owner ~= pname and owner ~= "" ) or
-		( prot ~= pname and ( minetest.is_protected(pos, pname)
-		or meta:get_string("doors_mode") == "" )) then
+		( prot ~= "" and prot ~= pname and
+		( minetest.is_protected(pos, pname) or
+		meta:get_string("doors_mode") == "" )) then
 			minetest.record_protection_violation(pos, pname)
 			minetest.chat_send_player(pname, S("You do not own this locked door."))
 			return nil
@@ -876,8 +877,9 @@ function doors.register_trapdoor(name, def)
 
 		-- verify placer is owner of lockable trap
 		if ( owner ~= pname and owner ~= "" ) or
-		( prot ~= pname and ( minetest.is_protected(pos, pname)
-		or meta:get_string("doors_mode") == "" )) then
+		( prot ~= "" and prot ~= pname and
+		( minetest.is_protected(pos, pname) or
+		meta:get_string("doors_mode") == "" )) then
 			minetest.record_protection_violation(pos, pname)
 			minetest.chat_send_player(pname, S("You do not own this trapdoor."))
 			return nil
@@ -1104,12 +1106,24 @@ minetest.register_tool("doors:lock_tool", {
 		elseif prot ~= ""
 		and owner == "" then
 
-			-- flip protected to normal
 			if player_name == prot then
-				infotext = " "
-				owner = ""
-				prot = ""
-				ok = 1
+				if user:get_player_control().sneak then
+					-- Switch doors mode
+					local mode = meta:get_string("doors_mode")
+					if mode == "" then
+						mode = "1" -- access: toggle and share key
+					elseif mode == "1" then
+						mode = "2" -- access: toggle, share key, dig
+					elseif mode == "2" then
+						mode = ""  -- access: toggle
+					end
+					meta:set_string("doors_mode", mode)
+				else -- flip protected to normal
+					infotext = " "
+					owner = ""
+					prot = ""
+					ok = 1
+				end
 			end
 		end
 
