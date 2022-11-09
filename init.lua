@@ -24,7 +24,7 @@ end
 local function replace_old_owner_information(pos)
 
 	local meta = minetest.get_meta(pos)
-	local owner = meta:get_string("doors_owner")
+	local owner = meta and meta:get_string("doors_owner")
 
 	if owner and owner ~= "" then
 		meta:set_string("owner", owner)
@@ -150,6 +150,11 @@ end
 
 
 local can_toggle = function(clicker, pos)
+
+	-- check for fake player
+	if clicker.is_fake_player then
+		return true
+	end
 
 	if can_dig_door(pos, clicker) then
 		return true
@@ -612,6 +617,19 @@ function doors.register(name, def)
 	def.selection_box = {type = "fixed", fixed = {-1/2,-1/2,-1/2,1/2,3/2,-6/16}}
 	def.collision_box = {type = "fixed", fixed = {-1/2,-1/2,-1/2,1/2,3/2,-6/16}}
 
+	-- mesecons support
+	if minetest.get_modpath("mesecons") then
+
+		local function door_switch(pos, node)
+			doors.door_toggle(pos, node, {is_fake_player = true})
+		end
+
+		def.mesecons = {effector = {
+			action_on = door_switch,
+			action_off = door_switch
+		}}
+	end
+
 	def.mesh = "door_a.b3d"
 	minetest.register_node(":" .. name .. "_a", table.copy(def))
 
@@ -889,6 +907,19 @@ function doors.register_trapdoor(name, def)
 	def.sound_close = def.sound_clode or "doors_door_close"
 	def.gain_open = def.gain_open or 0.2
 	def.gain_close = def.gain_close or 0.2
+
+	-- mesecons support
+	if minetest.get_modpath("mesecons") then
+
+		local function trapdoor_switch(pos, node)
+			doors.trapdoor_toggle(pos, node, {is_fake_player = true})
+		end
+
+		def.mesecons = {effector = {
+			action_on = trapdoor_switch,
+			action_off = trapdoor_switch
+		}}
+	end
 
 	local def_opened = table.copy(def)
 	local def_closed = table.copy(def)
