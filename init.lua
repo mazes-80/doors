@@ -1136,6 +1136,18 @@ minetest.register_alias("doors:key", "doors:lock_tool")
 
 local fence_collision_extra = minetest.settings:get_bool("enable_fence_tall") and 3/8 or 0
 
+
+function doors.fencegate_toggle(pos, node, clicker)
+
+	local node_def = minetest.registered_nodes[node.name]
+
+	minetest.swap_node(pos, {name = node_def._gate, param2 = node.param2})
+
+	minetest.sound_play(node_def._gate_sound, {pos = pos, gain = 0.15,
+			max_hear_distance = 8}, true)
+end
+
+
 function doors.register_fencegate(name, def)
 
 	local fence = {
@@ -1153,12 +1165,7 @@ function doors.register_fencegate(name, def)
 
 		on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 
-			local node_def = minetest.registered_nodes[node.name]
-
-			minetest.swap_node(pos, {name = node_def._gate, param2 = node.param2})
-
-			minetest.sound_play(node_def._gate_sound, {pos = pos, gain = 0.15,
-				max_hear_distance = 8}, true)
+			doors.fencegate_toggle(pos, node, clicker)
 
 			return itemstack
 		end,
@@ -1183,6 +1190,19 @@ function doors.register_fencegate(name, def)
 	end
 
 	fence.groups.fence = 1
+
+	-- mesecons support
+	if minetest.get_modpath("mesecons") then
+
+		local function fencegate_switch(pos, node)
+			doors.fencegate_toggle(pos, node, {is_fake_player = true})
+		end
+
+		fence.mesecons = {effector = {
+			action_on = fencegate_switch,
+			action_off = fencegate_switch
+		}}
+	end
 
 	local fence_closed = table.copy(fence)
 
