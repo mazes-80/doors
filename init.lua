@@ -163,9 +163,9 @@ local can_toggle = function(clicker, pos)
 		return true
 	end
 
-	local item = clicker:get_wielded_item()
+	local item = clicker and clicker:get_wielded_item()
 
-	if minetest.get_item_group(item:get_name(), "key") ~= 1 then
+	if not item or minetest.get_item_group(item:get_name(), "key") ~= 1 then
 		return false
 	end
 
