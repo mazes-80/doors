@@ -32,6 +32,11 @@ Optional dependences:
 * screwdriver
 * protector
 
+#### Mesecons Support
+
+Each door has mesecons support baked in so that switches and pressure plates can open
+both doors and trapdoors.  Please disable 'mesecons_doors' mod for it to work properly.
+
 #### Nodes
 
 | Node name               | Description name      |
