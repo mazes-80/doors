@@ -35,7 +35,8 @@ Optional dependences:
 #### Mesecons Support
 
 Each door has mesecons support baked in so that switches and pressure plates can open
-both doors and trapdoors.  Please disable 'mesecons_doors' mod for it to work properly.
+doors, trapdoors and fence gates.  Please disable 'mesecons_doors' mod so that it works
+properly.
 
 #### Nodes
 
