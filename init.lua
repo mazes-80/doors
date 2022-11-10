@@ -152,7 +152,7 @@ end
 local can_toggle = function(clicker, pos)
 
 	-- check for fake player
-	if clicker.is_fake_player then
+	if clicker and clicker.is_fake_player then
 		return true
 	end
 
