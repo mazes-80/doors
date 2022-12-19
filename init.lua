@@ -1330,3 +1330,6 @@ minetest.register_craft({
 	output = "default:iron_lump",
 	recipe = {{"default:key"}}
 })
+
+
+print("[MOD] Doors Redo loaded")
