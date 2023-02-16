@@ -2,6 +2,7 @@
 -- our API object
 doors = {
 	mod = "redo",
+	flavor = "mazes_80",
 	registered_doors = {},
 	registered_trapdoors = {}
 }
