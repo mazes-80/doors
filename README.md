@@ -1,4 +1,4 @@
-minetest mod Doors Redo
+minetest mod Doors Redo - mazes_80 flavor
 =========================
 
 Information
@@ -7,6 +7,10 @@ Information
 This mod replaces the default `doors` mod and adds a new tool that can flip
 between (open, locked, protected) states of any door or trapdoor.  Master keys
 can still be used to give players access to your locked doors.
+
+mazes_80 flavor adds 2 sneaky controls:
+the key tool allow access to more 'protected modes' when sneaking
+sneak digging doors allows to preserve your doors lock. Now you can move door without losing ability for friends to open door.
 
 ![screenshot.jpg](screenshot.jpg)
 
@@ -18,6 +22,9 @@ Tech information
 * OPEN - This is like default Doors mod, can be opened by any player or dug up.
 * OWNED - This locks the door so that only the owner can open or dig the door.
 * PROTECTED - This locks the door but based on protected area the door sits inside.
+** 1 - any area owner can open/close door
+** 2 - any area owner can open/close door, and make door keys
+** 3 - any area owner can open/close door, make door keys and dig door
 
 Note: A protection mod must be installed to use Protected mode so that it works
 properly, not having one running will mean all protected doors will open for
