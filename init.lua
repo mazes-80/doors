@@ -9,7 +9,7 @@ doors = {
 
 -- translation support
 local S
-if minetest.get_translator ~= nil then
+if minetest.get_translator then
 	S = minetest.get_translator("doors") -- 5.x translation function
 else
 	S = function(str, ...) -- boilerplate function
