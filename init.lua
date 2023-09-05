@@ -1117,6 +1117,9 @@ minetest.register_tool("doors:lock_tool", {
 			end
 		end
 
+		minetest.sound_play("doors_fencegate_open", {pos = pos, gain = 0.15,
+				max_hear_distance = 8, pitch = 1.5}, true)
+
 		return itemstack
 	end
 })
