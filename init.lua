@@ -143,6 +143,8 @@ local can_toggle = function(clicker, pos)
 		return true
 	end
 
+	if not clicker then return end
+
 	local meta = minetest.get_meta(pos)
 	local owner = meta:get_string("owner")
 	local prot  = meta:get_string("doors_protected")
