@@ -480,11 +480,8 @@ function doors.register(name, def)
 			meta:set_int("state", state)
 
 			if def.protected then
-
 				meta:set_string("owner", pn)
 				meta:set_string("infotext", def.description .. "\n" .. S("Owned by @1", pn))
-			else
-				meta:set_string("doors_mode", "2")
 			end
 
 			if not minetest.is_creative_enabled(pn) then
@@ -842,10 +839,6 @@ function doors.register_trapdoor(name, def)
 	def.after_place_node = function(pos, placer, itemstack, pointed_thing)
 
 		local meta = minetest.get_meta(pos)
-		if not def.protected then
-			meta:set_string("doors_mode", "2")
-			return
-		end
 
 		local pn = placer:get_player_name()
 
